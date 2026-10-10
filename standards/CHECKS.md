@@ -39,8 +39,10 @@ community job took about 13 seconds. Runner queues and cold downloads can add ti
 Superseded fast runs are cancelled when another commit arrives.
 
 PRs do not run full typechecking, tests, coverage, builds, generation, parity,
-browser suites, OS matrices, or native-library builds. Third-party security apps
-may post their own independent checks; these are outside the shared workflow.
+browser suites, OS matrices, or native-library builds. Some repositories also have a separate mandatory secret-security workflow. Its
+current pinned implementation scans Git history, so that extra job can take
+longer than the new-commit scan; it does not run tests, builds, or typechecking.
+Third-party security apps may post independent checks as well.
 
 The five-minute job timeout is a failure ceiling for stalled setup, not an expected
 duration. A cold install is not promised to finish within the observed range.
@@ -54,7 +56,7 @@ duration. A cold install is not promised to finish within the observed range.
 | Documentation and parity | Generated references, contracts, links, shared CLI behavior, and Bun smoke where configured | Seconds to a few minutes |
 | Platform/install checks | Windows/macOS/Linux behavior, supported Node versions, package installation | Several minutes; queues and cold installs vary |
 | Site browsers/export | Browser flows, responsive behavior, accessibility/SEO/link checks, and production export | Several minutes; a full site pipeline can take 10–20 minutes |
-| Release security | Dependency/workflow audits and the existing full-history secret scan | Seconds to a few minutes |
+| Release security | Dependency/workflow audits, full source scanning such as CodeQL, and the full-history secret scan | Seconds to several minutes; source scanning can dominate |
 
 For context, earlier local coverage runs took about 3 seconds for cli-core,
 1 second for cli-meetings, 1 minute each for Telegram/MAX, and 2–3 minutes for
