@@ -70,7 +70,12 @@ and its CodeQL languages to match their source. The
 contains the cross-project timing table, schedule, and failure-handling runbook.
 
 Existing full suites are preserved as reusable full-ci workflows and are required
-before package publication. Site deployment remains a release operation with full
+before package publication. The validated Linux build is packed once, then its SHA-256 is
+verified at the release handoff; the publisher receives that exact artifact. Separate Bun/OS
+jobs retain their own environment checks. Offline CLI contracts belong in full validation,
+with plans and reviewed snapshots described in
+[cli-testing](https://github.com/WireCatLabs/cli-testing/blob/main/docs/ci/CONTRACTS.md).
+Site deployment remains a release operation with full
 browser and export validation. Heavy platform and parity workflows are called by
 full validation and remain available manually; they do not run for ordinary PRs.
 Third-party security apps may post independent checks outside these YAML workflows.

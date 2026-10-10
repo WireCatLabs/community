@@ -71,15 +71,18 @@ For context, earlier local coverage runs took about 3 seconds for cli-core,
 cli-messaging. The docs unit suite took about 8 seconds. These are observations
 from one machine, not predictions for every runner.
 
-Full validation is required before package publication. Existing release-build
-checks are retained as well, so some tests/builds currently repeat during a release.
+Full validation is required before package publication. Full validation packs its checked Linux build once and emits a SHA-256 digest. The release
+handoff verifies and publishes that same immutable tarball, without a second install, full suite,
+build, or repack. MAX/Telegram release-specific checks remain before packing.
 Platform jobs can run in parallel; their times should not simply be added together.
 Allow minutes for a full release, particularly for larger CLIs and the docs site.
 
 Site deployment is a publication operation and still performs full validation.
 It can run after a main-branch merge or a released-tool update; it does not block
 the ordinary PR fast-check job. Native wrappers keep their full OS probes in their
-manual publish workflows. No workflow starts a live messenger test on its own.
+manual publish workflows. MAX, Telegram and Zoom also run offline metadata/error/help/MCP
+contracts in full validation (roughly 2.2, 3.0 and 0.7 seconds locally). No workflow starts a live
+messenger test on its own.
 
 Npm upload, registry propagation, and deployment are separate from the check
 budget and can add time after validation passes.
