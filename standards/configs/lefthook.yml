@@ -12,7 +12,7 @@ pre-commit:
       glob: "*.{ts,tsx,js,mjs,cjs,json,jsonc}"
       # Staged files only. The whole-repo run is the CI gate; running it per-commit is how people
       # end up reaching for --no-verify, which is worse than no hook.
-      run: pnpm exec biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      run: ./node_modules/.bin/biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
 
     gitleaks:
       # Staged content only, and it warns rather than blocks when gitleaks is not installed: a
