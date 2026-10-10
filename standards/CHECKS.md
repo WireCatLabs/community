@@ -30,6 +30,7 @@ required locally by default. Developers can run a targeted check when they need 
 | Config integrity | Verify copied preset hashes, pinned tools, and root config bindings | Less than 1 second |
 | Repository Biome | Apply the shared code rules and local architecture restrictions | About 1–3 seconds |
 | Markdown lint | Check configured documentation for missing code-fence languages, tabs, and empty links | About 1–3 seconds |
+| Early bug checks (`ci:quick`) | CLI typechecking, or the docs site's synthetic unit suite | Allow about 5–30 seconds for typechecks; docs tests previously took about 8 seconds |
 | New-commit secret scan | Scan the PR or push commit range, rather than all historical commits | About 1–3 seconds, including fetching the scanner |
 
 The job does one cached dependency installation with lifecycle scripts disabled.
@@ -38,8 +39,14 @@ Observed complete jobs across the ten projects took about 15–40 seconds; the
 community job took about 13 seconds. Runner queues and cold downloads can add time.
 Superseded fast runs are cancelled when another commit arrives.
 
-PRs do not run full typechecking, tests, coverage, builds, generation, parity,
-browser suites, OS matrices, or native-library builds. Some repositories also have a separate mandatory secret-security workflow. Its
+The updated profile adds a bounded early-bug step: the nine CLI packages run their existing
+typecheck; the docs site runs its synthetic unit tests. Allow about 20–70 seconds for ordinary
+CI depending on the package, pending measurements of the updated jobs. The step has a two-minute
+failure ceiling. Local CLI typechecks passed in about 1–6 seconds each. The docs command-group
+test needs generated references and remains in full validation; the other 31 files run in fast CI.
+Heavy test suites, coverage, builds, documentation generation, parity,
+browser suites, OS matrices, and native-library builds remain in full validation.
+Some repositories also have a separate mandatory secret-security workflow. Its
 current pinned implementation scans Git history, so that extra job can take
 longer than the new-commit scan; it does not run tests, builds, or typechecking.
 Third-party security apps may post independent checks as well.
@@ -47,7 +54,7 @@ Third-party security apps may post independent checks as well.
 The five-minute job timeout is a failure ceiling for stalled setup, not an expected
 duration. A cold install is not promised to finish within the observed range.
 
-## Releases and explicitly requested full validation
+## Releases, monthly checks, and explicitly requested full validation
 
 | Check group | What it covers | Rough scale |
 | --- | --- | --- |
@@ -75,3 +82,10 @@ manual publish workflows. No workflow starts a live messenger test on its own.
 
 Npm upload, registry propagation, and deployment are separate from the check
 budget and can add time after validation passes.
+
+Each project also runs full validation and release-grade security on the first day of each month,
+staggered between 02:17 and 03:20 UTC. Native wrapper probes and community security follow afterward.
+Monthly jobs never publish packages or deploy the site. They become active after merge.
+The cross-project [timing table](https://github.com/WireCatLabs/cli-testing/blob/main/docs/ci/TIMINGS.md)
+and [monthly runbook](https://github.com/WireCatLabs/cli-testing/blob/main/docs/ci/MONTHLY.md)
+record the schedule and failure handling.

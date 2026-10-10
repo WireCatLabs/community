@@ -50,13 +50,24 @@ rough costs.
 | --- | --- |
 | Commit | Biome on staged files and staged secret detection |
 | Push | No local checks |
-| PR / main CI | Preset integrity, Biome, Markdown lint, critical secret detection |
-| Release / manual full validation | Typecheck, tests and coverage, build, Bun, documentation contracts, parity, platform and browser suites |
+| PR / main CI | Preset integrity, Biome, Markdown lint, critical secret detection, and bounded `ci:quick` bug checks |
+| Release / monthly / manual full validation | Typecheck, tests and coverage, build, Bun, documentation contracts, parity, platform and browser suites, heavy security |
 
 Hooks must not install dependencies, build, typecheck, generate files, or run tests.
 Fast CI uses one cached dependency installation with lifecycle scripts disabled.
 New commits cancel superseded fast runs. Runner queues and cold downloads are
 outside the check-time budget, so total GitHub turnaround is not guaranteed.
+
+Projects define `ci:quick` in their package scripts: existing typechecking for CLI packages,
+synthetic unit tests for the docs site. This step has a two-minute failure ceiling.
+The shared template allows projects without that script to adopt static checks alone;
+review their early bug checks when onboarding. Do not put live-account or agent suites here.
+
+The [monthly workflow template](templates/monthly.yml) calls a project's existing `ci.yml`
+and pinned release-security workflow without publishing. Adjust its cron to stagger new projects
+and its CodeQL languages to match their source. The
+[cli-testing CI folder](https://github.com/WireCatLabs/cli-testing/tree/main/docs/ci)
+contains the cross-project timing table, schedule, and failure-handling runbook.
 
 Existing full suites are preserved as reusable full-ci workflows and are required
 before package publication. Site deployment remains a release operation with full
@@ -73,6 +84,6 @@ and TypeScript settings. Framework options and architecture restrictions stay lo
 
 ## Security checks
 
-PR security is the fast Gitleaks secret check; hosted push protection prevents credential exposure. Heavy security checks run before package publication or production deployment, or on demand. Reuse the pinned cli-core `release-checks.yml` workflow and make publication depend on it. Production dependency audit and CodeQL block critical findings; noncritical findings are reviewed by the owner. Workflow analysis reports findings and fails if the scanner itself cannot complete. Do not add heavyweight source scanners to edit/Stop hooks or ordinary PR jobs. Tests, coverage and compatibility checks follow the release/manual schedule above.
+PR security is the fast Gitleaks secret check; hosted push protection prevents credential exposure. Heavy security checks run before package publication or production deployment, monthly, or on demand. Reuse the pinned cli-core `release-checks.yml` workflow and make publication depend on it. Production dependency audit and CodeQL block critical findings; noncritical findings are reviewed by the owner. Workflow analysis reports findings and fails if the scanner itself cannot complete. Do not add heavyweight source scanners to edit/Stop hooks or ordinary PR jobs. Tests, coverage and compatibility checks follow the release/monthly/manual schedule above.
 
 Repositories without a package release use a manual security-release workflow; the documentation site's production deployment is its release boundary. Hosted secret-scanning availability can differ for private repositories, so record coverage gaps rather than claiming protection that the service does not provide.
