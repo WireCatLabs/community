@@ -58,3 +58,9 @@ does not certify a repository is free of security issues or license problems.
 Node 24 is used in the CI template; projects retain their own minimum Node runtime
 and TypeScript build settings. Next.js, Tailwind, browser tests, documentation-site
 generation, and CLI runtime tests stay with the projects that need them.
+
+## Security checks
+
+PR security is the fast Gitleaks secret check; hosted push protection prevents credential exposure. Heavy security checks run before package publication or production deployment, or on demand. Reuse the pinned cli-core `release-checks.yml` workflow and make publication depend on it. Production dependency audit and CodeQL block critical findings; noncritical findings are reviewed by the owner. Workflow analysis reports findings and fails if the scanner itself cannot complete. Do not add heavyweight source scanners to edit/Stop hooks or ordinary PR jobs. Tests, coverage and compatibility checks keep their existing development triggers.
+
+Repositories without a package release use a manual security-release workflow; the documentation site's production deployment is its release boundary. Hosted secret-scanning availability can differ for private repositories, so record coverage gaps rather than claiming protection that the service does not provide.
