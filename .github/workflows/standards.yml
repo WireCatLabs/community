@@ -20,4 +20,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm standards:check
+      - run: pnpm lint
       - run: pnpm docs:lint
+      - run: pnpm docs:spell

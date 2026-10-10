@@ -1,6 +1,6 @@
 {
   "source": "https://github.com/WireCatLabs/community",
-  "revision": "bootstrap",
+  "revision": "bfd56be79ac1c39c3692bf83eb7ea8bc046682f0",
   "files": {
     "biome.base.json": "83a43910f2530e21d720e3ad4c3fc7fcb16ba36253c6dbc720b3c68a4dd80893",
     "cspell.json": "8241122ed4d461976a838099b265ef8f2689a066608257b6fdc250d9b49b58aa",
