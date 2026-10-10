@@ -14,7 +14,7 @@ local hooks are synchronized. Timing ranges are a guide, not a deadline guarante
 | Push | None | No config integrity, typecheck, build, parity, or test hook | No check overhead |
 
 The two commit checks run in parallel. Recent complete commit-hook runs took
-roughly 0.3–0.9 seconds. Large staged changes can take longer. Hooks use the
+roughly 0.3–1.5 seconds. Large staged changes can take longer. Hooks use the
 installed Biome binary through Node, so committing does not invoke package-manager
 auto-installation. If gitleaks is absent locally, the hook warns; CI still scans.
 
