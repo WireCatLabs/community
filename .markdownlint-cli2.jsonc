@@ -1,0 +1,14 @@
+{
+  "globs": [
+    "*.md",
+    "contributing/**/*.md",
+    "legal/**/*.md",
+    "security/**/*.md",
+    "support/**/*.md",
+    "standards/**/*.md"
+  ],
+  "ignores": ["node_modules", "dist", ".worktrees", "config/wirecat"],
+  "config": {
+    "extends": "./config/wirecat/markdownlint.json"
+  }
+}

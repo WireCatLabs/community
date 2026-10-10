@@ -1,40 +1,46 @@
 # WireCat community
 
-Shared policies, contributor resources, and maintainer guidance for WireCat
-projects. This repository can grow to include organization resources beyond CLIs.
+Shared policies, contributor resources, and development standards for WireCat
+projects, including future projects beyond CLIs.
 
-- [Contributing](CONTRIBUTING.md): development, contribution licensing, and DCO sign-off.
-- [Security](SECURITY.md): private vulnerability reporting.
-- [Support](SUPPORT.md): usage questions and bug reports.
-- [Code of conduct](CODE_OF_CONDUCT.md): community expectations and moderation.
-- [Maintainer checklist](MAINTAINERS.md): licensing, attribution, branding, and release controls.
+| Folder | Contents |
+| --- | --- |
+| [contributing/](contributing/README.md) | Contribution workflow, licensing, DCO sign-off, code of conduct |
+| [legal/](legal/README.md) | Ownership, attribution, licensing, branding, maintainer checklist |
+| [security/](security/README.md) | Private vulnerability reporting |
+| [support/](support/README.md) | Usage questions and bug reports |
+| [standards/](standards/README.md) | Shared linters, formatting, spelling, Git hooks, tool versions, CI template |
+| [scripts/](scripts/) | Standards adoption and GitHub-default synchronization |
 
-## GitHub defaults
+## GitHub entry points
 
-This repository is the source of truth for shared policies. GitHub automatically
-inherits community files only from a public repository named `.github`. The
-[WireCatLabs/.github](https://github.com/WireCatLabs/.github) repository therefore
-holds copies of the four policy files above.
+Root CONTRIBUTING, SECURITY, SUPPORT, and CODE_OF_CONDUCT files are short entry
+points to the structured policies. They are mirrored to
+[WireCatLabs/.github](https://github.com/WireCatLabs/.github), the public repository
+GitHub requires for organization defaults. Repository-local policies override them.
+GitHub defaults are not included in individual clones or packages; each project
+must retain its own LICENSE and required distribution notices.
 
-Repository-local policies override those defaults. Shared defaults are displayed
-by GitHub but are not included in individual repository clones or packages. Each
-project must keep its own LICENSE and any required distribution notices.
-See [GitHub's inheritance rules](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file).
-
-After changing a shared policy on the main branch, synchronize the defaults:
+After merging policy changes to main:
 
 ```sh
 python3 scripts/sync-defaults.py --check
 python3 scripts/sync-defaults.py --apply
 ```
 
-The command uses your existing GitHub CLI authentication and ordinary Git access.
-It does not require a stored cross-repository token. `--check` makes no changes;
-`--apply` commits and pushes only the four managed policy files to the defaults
-repository. Synchronization is manual; there is no automatic deployment workflow.
+The command uses existing GitHub CLI and Git authentication. Synchronization is
+manual and changes only the four managed entry-point files. It does not store a
+cross-repository token. See [GitHub's inheritance rules](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file).
+
+## Shared tooling
+
+See [standards/](standards/README.md) for the baseline and adoption command.
+Project-specific framework configuration, runtime tests, and architectural lint
+rules remain in their own repositories. Shared copies record their source revision
+and hashes so updates can be reviewed and drift detected.
 
 ## License
 
-Original material in this repository is licensed under [Apache-2.0](LICENSE).
-Linked external documents retain their own terms. A project's own license governs
-contributions to that project; these defaults do not change it.
+Original material is licensed under [Apache-2.0](LICENSE). Linked external
+materials retain their own terms. These policies do not change other projects'
+licenses or establish completed ownership or trademark audits.
