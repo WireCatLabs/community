@@ -9,7 +9,7 @@ rules and generated-file exclusions in each project's root configuration.
 | Biome | Formatting, recommended rules, strict unused-code and type rules | Architecture boundaries, framework options, generated files |
 | markdownlint-cli2 | Tabs, blank lines, fenced-code languages, empty links | Documents to check and additional rules |
 | CSpell | English, British English, Russian, Spanish, WireCat vocabulary | Documentation scope and project vocabulary |
-| Lefthook | Staged Biome and optional secret scan; config integrity before push | Additional project hooks |
+| Lefthook | Staged Biome and optional secret scan; no push hook | Additional project hooks |
 | rumdl | Compatibility preset for existing CLI documentation checks | Existing docs commands and exclusions |
 
 The Biome and hook base originated in cli-core, which cli-docs already extended.
@@ -24,7 +24,6 @@ From a reviewed checkout of this repository:
 python3 scripts/adopt-standards.py /path/to/project
 cd /path/to/project
 pnpm install
-pnpm standards:check
 pnpm lint
 pnpm docs:lint
 pnpm docs:spell
@@ -36,7 +35,7 @@ Biome, CSpell, Markdown, and Git hooks extend those copies. Existing project
 overrides and development scripts are preserved. Commit the updated lockfile.
 Inspect the resulting diff and run the project's required checks before merging.
 
-`standards:check` detects edits to managed presets, dependency-version drift, or
+In CI, `standards:check` detects edits to managed presets, dependency-version drift, or
 disconnected root configs without network access. Project changes belong in root
 configs; general improvements belong in this repository and are adopted through
 reviewed updates. The installer changes files only: it does not install packages,
@@ -44,10 +43,13 @@ run hooks, push commits, publish releases, or rewrite application code.
 
 ## CI and hooks
 
+See [the check schedule and timing guide](CHECKS.md) for what each check does and
+rough costs.
+
 | Trigger | Checks |
 | --- | --- |
 | Commit | Biome on staged files and staged secret detection |
-| Push | Offline preset and dependency integrity check |
+| Push | No local checks |
 | PR / main CI | Preset integrity, Biome, Markdown lint, critical secret detection |
 | Release / manual full validation | Typecheck, tests and coverage, build, Bun, documentation contracts, parity, platform and browser suites |
 
