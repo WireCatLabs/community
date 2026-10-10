@@ -41,7 +41,8 @@ Superseded fast runs are cancelled when another commit arrives.
 
 The updated profile adds a bounded early-bug step: the nine CLI packages run their existing
 typecheck; the docs site runs its synthetic unit tests. Allow about 20–70 seconds for ordinary
-CI depending on the package, pending measurements of the updated jobs. The step has a two-minute
+CI depending on the package. First successful updated jobs took 17–34 seconds, with community
+at 14 seconds; these include the early-bug step and exclude queue time. The step has a two-minute
 failure ceiling. Local CLI typechecks passed in about 1–6 seconds each. The docs command-group
 test needs generated references and remains in full validation; the other 31 files run in fast CI.
 Heavy test suites, coverage, builds, documentation generation, parity,
