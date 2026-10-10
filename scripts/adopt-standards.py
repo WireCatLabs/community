@@ -52,7 +52,7 @@ def main():
     biome_path = target / "biome.json"
     biome = read_json(biome_path, {"files": {"includes": ["**", "!**/node_modules", "!**/dist", "!.worktrees", "!pnpm-lock.yaml"]}})
     extends = [value for value in biome.get("extends", [])
-               if value not in ("@wirecat/cli-core/biome", "@leemour/cli-core/biome", "./config/biome.base.json", "./config/wirecat/biome.json", "./config/wirecat/biome.base.json")]
+               if value not in ("@wirecat/cli-core/biome", "./config/biome.base.json", "./config/wirecat/biome.json", "./config/wirecat/biome.base.json")]
     biome["extends"] = ["./config/wirecat/biome.base.json", *extends]
     includes = biome.setdefault("files", {}).setdefault("includes", ["**"])
     # "!**/.worktrees" also matches the path of a worktree itself, so lint run inside one checks nothing.
@@ -65,7 +65,7 @@ def main():
     spell_path = target / "cspell.json"
     spell = read_json(spell_path, {"version": "0.2", "files": ["README.md"]})
     imports = [value for value in spell.get("import", [])
-               if value not in ("@wirecat/cli-core/cspell", "@leemour/cli-core/cspell", "./config/wirecat/cspell.json")]
+               if value not in ("@wirecat/cli-core/cspell", "./config/wirecat/cspell.json")]
     spell["import"] = ["./config/wirecat/cspell.json", *imports]
     write_json(spell_path, spell)
 
@@ -84,7 +84,7 @@ def main():
 
     hook_path = target / "lefthook.yml"
     hook = hook_path.read_text() if hook_path.exists() else "extends:\n  - config/wirecat/lefthook.yml\n"
-    hook = re.sub(r"(?:node_modules/@(?:wirecat|leemour)/cli-core/)?config/lefthook\.yml", "config/wirecat/lefthook.yml", hook)
+    hook = re.sub(r"(?:node_modules/@wirecat/cli-core/)?config/lefthook\.yml", "config/wirecat/lefthook.yml", hook)
     if "config/wirecat/lefthook.yml" not in hook:
         if re.search(r"^extends:\s*$", hook, re.M):
             hook = re.sub(r"^extends:\s*$", "extends:\n  - config/wirecat/lefthook.yml", hook, count=1, flags=re.M)
