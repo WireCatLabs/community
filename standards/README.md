@@ -9,7 +9,7 @@ rules and generated-file exclusions in each project's root configuration.
 | Biome | Formatting, recommended rules, strict unused-code and type rules | Architecture boundaries, framework options, generated files |
 | markdownlint-cli2 | Tabs, blank lines, fenced-code languages, empty links | Documents to check and additional rules |
 | CSpell | English, British English, Russian, Spanish, WireCat vocabulary | Documentation scope and project vocabulary |
-| Lefthook | Staged Biome and optional secret scan; typecheck before push | Additional project hooks |
+| Lefthook | Staged Biome and optional secret scan; no push hook | Additional project hooks |
 | rumdl | Compatibility preset for existing CLI documentation checks | Existing docs commands and exclusions |
 
 The Biome and hook base originated in cli-core, which cli-docs already extended.
@@ -24,7 +24,6 @@ From a reviewed checkout of this repository:
 python3 scripts/adopt-standards.py /path/to/project
 cd /path/to/project
 pnpm install
-pnpm standards:check
 pnpm lint
 pnpm docs:lint
 pnpm docs:spell
@@ -36,7 +35,7 @@ Biome, CSpell, Markdown, and Git hooks extend those copies. Existing project
 overrides and development scripts are preserved. Commit the updated lockfile.
 Inspect the resulting diff and run the project's required checks before merging.
 
-`standards:check` detects edits to managed presets, dependency-version drift, or
+In CI, `standards:check` detects edits to managed presets, dependency-version drift, or
 disconnected root configs without network access. Project changes belong in root
 configs; general improvements belong in this repository and are adopted through
 reviewed updates. The installer changes files only: it does not install packages,
@@ -44,23 +43,47 @@ run hooks, push commits, publish releases, or rewrite application code.
 
 ## CI and hooks
 
-The [CI template](templates/standards.yml) runs standards verification and the
-shared Markdown check. Each repository's existing CI keeps code lint, typecheck,
-tests, coverage, builds, and any specialized documentation checks. Spell checking
-is available consistently but is not a universal CI gate yet: scopes and accepted
-vocabulary must be reviewed per project before making it required.
+See [the check schedule and timing guide](CHECKS.md) for what each check does and
+rough costs.
 
-Install local hooks with `pnpm exec lefthook install`. The staged secret check
-warns if gitleaks is unavailable; it is not a substitute for a CI secret scan.
-Run `docs:spell` when changing public documentation. A successful standards check
-does not certify a repository is free of security issues or license problems.
+| Trigger | Checks |
+| --- | --- |
+| Commit | Biome on staged files and staged secret detection |
+| Push | No local checks |
+| PR / main CI | Preset integrity, Biome, Markdown lint, critical secret detection, and bounded `ci:quick` bug checks |
+| Release / monthly / manual full validation | Typecheck, tests and coverage, build, Bun, documentation contracts, parity, platform and browser suites, heavy security |
 
-Node 24 is used in the CI template; projects retain their own minimum Node runtime
-and TypeScript build settings. Next.js, Tailwind, browser tests, documentation-site
-generation, and CLI runtime tests stay with the projects that need them.
+Hooks must not install dependencies, build, typecheck, generate files, or run tests.
+Fast CI uses one cached dependency installation with lifecycle scripts disabled.
+New commits cancel superseded fast runs. Runner queues and cold downloads are
+outside the check-time budget, so total GitHub turnaround is not guaranteed.
+
+Projects define `ci:quick` in their package scripts: existing typechecking for CLI packages,
+synthetic unit tests for the docs site. This step has a two-minute failure ceiling.
+The shared template allows projects without that script to adopt static checks alone;
+review their early bug checks when onboarding. Do not put live-account or agent suites here.
+
+The [monthly workflow template](templates/monthly.yml) calls a project's existing `ci.yml`
+and pinned release-security workflow without publishing. Adjust its cron to stagger new projects
+and its CodeQL languages to match their source. The
+[cli-testing CI folder](https://github.com/WireCatLabs/cli-testing/tree/main/docs/ci)
+contains the cross-project timing table, schedule, and failure-handling runbook.
+
+Existing full suites are preserved as reusable full-ci workflows and are required
+before package publication. Site deployment remains a release operation with full
+browser and export validation. Heavy platform and parity workflows are called by
+full validation and remain available manually; they do not run for ordinary PRs.
+Third-party security apps may post independent checks outside these YAML workflows.
+
+Install local hooks with `pnpm exec lefthook install`. A missing gitleaks binary
+produces a warning locally; CI secret detection remains mandatory. Spelling is
+available for documentation edits without forcing every commit to scan all docs.
+
+Node 24 is used in CI; projects retain their own minimum supported Node runtime
+and TypeScript settings. Framework options and architecture restrictions stay local.
 
 ## Security checks
 
-PR security is the fast Gitleaks secret check; hosted push protection prevents credential exposure. Heavy security checks run before package publication or production deployment, or on demand. Reuse the pinned cli-core `release-checks.yml` workflow and make publication depend on it. Production dependency audit and CodeQL block critical findings; noncritical findings are reviewed by the owner. Workflow analysis reports findings and fails if the scanner itself cannot complete. Do not add heavyweight source scanners to edit/Stop hooks or ordinary PR jobs. Tests, coverage and compatibility checks keep their existing development triggers.
+PR security is the fast Gitleaks secret check; hosted push protection prevents credential exposure. Heavy security checks run before package publication or production deployment, monthly, or on demand. Reuse the pinned cli-core `release-checks.yml` workflow and make publication depend on it. Production dependency audit and CodeQL block critical findings; noncritical findings are reviewed by the owner. Workflow analysis reports findings and fails if the scanner itself cannot complete. Do not add heavyweight source scanners to edit/Stop hooks or ordinary PR jobs. Tests, coverage and compatibility checks follow the release/monthly/manual schedule above.
 
 Repositories without a package release use a manual security-release workflow; the documentation site's production deployment is its release boundary. Hosted secret-scanning availability can differ for private repositories, so record coverage gaps rather than claiming protection that the service does not provide.
