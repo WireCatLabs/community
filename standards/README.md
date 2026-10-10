@@ -9,7 +9,7 @@ rules and generated-file exclusions in each project's root configuration.
 | Biome | Formatting, recommended rules, strict unused-code and type rules | Architecture boundaries, framework options, generated files |
 | markdownlint-cli2 | Tabs, blank lines, fenced-code languages, empty links | Documents to check and additional rules |
 | CSpell | English, British English, Russian, Spanish, WireCat vocabulary | Documentation scope and project vocabulary |
-| Lefthook | Staged Biome and optional secret scan; typecheck before push | Additional project hooks |
+| Lefthook | Staged Biome and optional secret scan; config integrity before push | Additional project hooks |
 | rumdl | Compatibility preset for existing CLI documentation checks | Existing docs commands and exclusions |
 
 The Biome and hook base originated in cli-core, which cli-docs already extended.
@@ -44,17 +44,27 @@ run hooks, push commits, publish releases, or rewrite application code.
 
 ## CI and hooks
 
-The [CI template](templates/standards.yml) runs standards verification and the
-shared Markdown check. Each repository's existing CI keeps code lint, typecheck,
-tests, coverage, builds, and any specialized documentation checks. Spell checking
-is available consistently but is not a universal CI gate yet: scopes and accepted
-vocabulary must be reviewed per project before making it required.
+| Trigger | Checks |
+| --- | --- |
+| Commit | Biome on staged files and staged secret detection |
+| Push | Offline preset and dependency integrity check |
+| PR / main CI | Preset integrity, Biome, Markdown lint, critical secret detection |
+| Release / manual full validation | Typecheck, tests and coverage, build, Bun, documentation contracts, parity, platform and browser suites |
 
-Install local hooks with `pnpm exec lefthook install`. The staged secret check
-warns if gitleaks is unavailable; it is not a substitute for a CI secret scan.
-Run `docs:spell` when changing public documentation. A successful standards check
-does not certify a repository is free of security issues or license problems.
+Hooks must not install dependencies, build, typecheck, generate files, or run tests.
+Fast CI uses one cached dependency installation with lifecycle scripts disabled.
+New commits cancel superseded fast runs. Runner queues and cold downloads are
+outside the check-time budget, so total GitHub turnaround is not guaranteed.
 
-Node 24 is used in the CI template; projects retain their own minimum Node runtime
-and TypeScript build settings. Next.js, Tailwind, browser tests, documentation-site
-generation, and CLI runtime tests stay with the projects that need them.
+Existing full suites are preserved as reusable full-ci workflows and are required
+before package publication. Site deployment remains a release operation with full
+browser and export validation. Heavy platform and parity workflows are called by
+full validation and remain available manually; they do not run for ordinary PRs.
+Third-party security apps may post independent checks outside these YAML workflows.
+
+Install local hooks with `pnpm exec lefthook install`. A missing gitleaks binary
+produces a warning locally; CI secret detection remains mandatory. Spelling is
+available for documentation edits without forcing every commit to scan all docs.
+
+Node 24 is used in CI; projects retain their own minimum supported Node runtime
+and TypeScript settings. Framework options and architecture restrictions stay local.
