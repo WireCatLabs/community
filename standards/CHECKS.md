@@ -71,8 +71,8 @@ For context, earlier local coverage runs took about 3 seconds for cli-core,
 cli-messaging. The docs unit suite took about 8 seconds. These are observations
 from one machine, not predictions for every runner.
 
-Full validation is required before package publication. Full validation packs its checked Linux build once and emits a SHA-256 digest. The release
-handoff verifies and publishes that same immutable tarball, without a second install, full suite,
+Before package publication, full validation packs its checked Linux build once and emits a
+SHA-256 digest. The release handoff verifies and publishes that same immutable tarball, without a second install, full suite,
 build, or repack. MAX/Telegram release-specific checks remain before packing.
 Platform jobs can run in parallel; their times should not simply be added together.
 Allow minutes for a full release, particularly for larger CLIs and the docs site.
