@@ -50,12 +50,14 @@ def main():
     shutil.copyfile(source / "LICENSE", managed / "LICENSE")
 
     biome_path = target / "biome.json"
-    biome = read_json(biome_path, {"files": {"includes": ["**", "!**/node_modules", "!**/dist", "!**/.worktrees", "!pnpm-lock.yaml"]}})
+    biome = read_json(biome_path, {"files": {"includes": ["**", "!**/node_modules", "!**/dist", "!.worktrees", "!pnpm-lock.yaml"]}})
     extends = [value for value in biome.get("extends", [])
                if value not in ("@wirecat/cli-core/biome", "@leemour/cli-core/biome", "./config/biome.base.json", "./config/wirecat/biome.json", "./config/wirecat/biome.base.json")]
     biome["extends"] = ["./config/wirecat/biome.base.json", *extends]
-    biome.setdefault("files", {}).setdefault("includes", ["**"])
-    for pattern in ["!**/.worktrees", "!config/wirecat"]:
+    includes = biome.setdefault("files", {}).setdefault("includes", ["**"])
+    # "!**/.worktrees" also matches the path of a worktree itself, so lint run inside one checks nothing.
+    includes[:] = ["!.worktrees" if value == "!**/.worktrees" else value for value in includes]
+    for pattern in ["!.worktrees", "!config/wirecat"]:
         if pattern not in biome["files"]["includes"]:
             biome["files"]["includes"].append(pattern)
     write_json(biome_path, biome)
