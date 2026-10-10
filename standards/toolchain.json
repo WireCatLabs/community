@@ -1,0 +1,13 @@
+{
+  "packageManager": "pnpm@11.20.0",
+  "node": ">=22",
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@cspell/dict-en-gb": "5.0.34",
+    "@cspell/dict-es-es": "3.0.9",
+    "@cspell/dict-ru_ru": "2.3.3",
+    "cspell": "10.3.6",
+    "lefthook": "2.1.16",
+    "markdownlint-cli2": "0.23.3"
+  }
+}

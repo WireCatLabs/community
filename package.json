@@ -1,0 +1,28 @@
+{
+  "name": "@wirecat/community",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "docs:lint": "markdownlint-cli2",
+    "docs:spell": "cspell lint --config cspell.json --no-progress",
+    "prepare": "lefthook install || true",
+    "standards:check": "node config/wirecat/check.mjs"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@cspell/dict-en-gb": "5.0.34",
+    "@cspell/dict-es-es": "3.0.9",
+    "@cspell/dict-ru_ru": "2.3.3",
+    "cspell": "10.3.6",
+    "lefthook": "2.1.16",
+    "markdownlint-cli2": "0.23.3"
+  }
+}

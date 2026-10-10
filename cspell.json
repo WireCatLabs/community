@@ -1,0 +1,30 @@
+{
+  "version": "0.2",
+  "files": [
+    "*.md",
+    "contributing/**/*.md",
+    "legal/**/*.md",
+    "security/**/*.md",
+    "support/**/*.md",
+    "standards/**/*.md"
+  ],
+  "words": [
+    "DCO",
+    "CSpell",
+    "Lefthook",
+    "rumdl",
+    "backports",
+    "noreply",
+    "provenance",
+    "signoff",
+    "signoffs",
+    "presets",
+    "Biome",
+    "typecheck",
+    "typechecked",
+    "unmatched",
+    "jsonc",
+    "MDX"
+  ],
+  "import": ["./config/wirecat/cspell.json"]
+}
