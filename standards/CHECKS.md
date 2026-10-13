@@ -66,7 +66,7 @@ duration. A cold install is not promised to finish within the observed range.
 | Site browsers/export | Browser flows, responsive behavior, accessibility/SEO/link checks, and production export | Several minutes; a full site pipeline can take 10–20 minutes |
 | Release security | Dependency/workflow audits, full source scanning such as CodeQL, and the full-history secret scan | Seconds to several minutes; source scanning can dominate |
 
-For context, earlier local coverage runs took about 3 seconds for cli-core,
+For context, earlier local coverage runs took about 3 seconds for cli-base,
 1 second for cli-meetings, 1 minute each for Telegram/MAX, and 2–3 minutes for
 cli-messaging. The docs unit suite took about 8 seconds. These are observations
 from one machine, not predictions for every runner.
