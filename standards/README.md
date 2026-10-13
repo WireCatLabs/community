@@ -51,6 +51,7 @@ rough costs.
 | Commit | Biome on staged files and staged secret detection |
 | Push | No local checks |
 | PR / main CI | Preset integrity, Biome, Markdown lint, critical secret detection, and bounded `ci:quick` bug checks |
+| Push to `main` (each merge) | Full validation on Linux: typecheck, tests and coverage, build, Bun, documentation contracts, parity. Not on PR branches; no platform suites, no publishing |
 | Release / monthly / manual full validation | Typecheck, tests and coverage, build, Bun, documentation contracts, parity, platform and browser suites, heavy security |
 
 Hooks must not install dependencies, build, typecheck, generate files, or run tests.
