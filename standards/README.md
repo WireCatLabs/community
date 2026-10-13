@@ -93,3 +93,14 @@ and TypeScript settings. Framework options and architecture restrictions stay lo
 PR security is the fast Gitleaks secret check; hosted push protection prevents credential exposure. Heavy security checks run before package publication or production deployment, monthly, or on demand. Reuse the pinned cli-base `release-checks.yml` workflow and make publication depend on it. Production dependency audit and CodeQL block critical findings; noncritical findings are reviewed by the owner. Workflow analysis reports findings and fails if the scanner itself cannot complete. Do not add heavyweight source scanners to edit/Stop hooks or ordinary PR jobs. Tests, coverage and compatibility checks follow the release/monthly/manual schedule above.
 
 Repositories without a package release use a manual security-release workflow; the documentation site's production deployment is its release boundary. Hosted secret-scanning availability can differ for private repositories, so record coverage gaps rather than claiming protection that the service does not provide.
+
+## Size limits
+
+Code that handles user data must keep working when that data is large. Never spread an
+unbounded list into a call (`push(...items)`, `Math.max(...items)`): V8 throws at about
+125,000 arguments, so loop or reduce instead. SQLite takes at most 32,766 `?`
+parameters, so chunk an `IN` list by 500 or pass it as one JSON parameter through
+`json_each`. Send provider requests in batches no larger than the provider's documented
+limit. Every command that takes a list states "at most N" in `--help` when N is
+enforced. Past N it fails with an error that says how to split the input. Reading a
+folder or file of user-chosen size has a cap or streams.
