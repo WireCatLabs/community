@@ -109,15 +109,20 @@ into `config/wirecat/` with the base. They run with the rest of Biome in the com
 | `plugin/no-unbounded-spread` | warning | `.push(...x)`, `Math.max(...x)`, `Math.min(...x)` (see [Size limits](#size-limits)) |
 
 `noSecrets` uses an entropy threshold of 50, not Biome's default of 41. The default flags hundreds of
-identifiers, Cyrillic strings and generated API descriptions. At 50 it still catches GitHub, AWS, Slack,
-Google, OpenAI, Anthropic, Telegram bot and Stripe keys and JWTs. Short hex and base64 values fall
-below it; gitleaks covers them. It is off for test files, `test/`, `tests/`, `__tests__/`, `fixtures/` and
+identifiers, Cyrillic strings and generated API descriptions. The rule is a net under gitleaks, not a
+replacement: on 100 random tokens of each shape, 50 caught every AWS key ID, Slack token and JWT, 89–98%
+of GitHub, OpenAI and AWS secret keys, 63–69% of Stripe and Google API keys, about half of Telegram bot,
+Anthropic and Google OAuth client secrets, and no hex string. The default 41 does not reach 100% on those
+shapes either. It is off for test files, `test/`, `tests/`, `__tests__/`, `fixtures/` and
 `generated/`. Tests carry fake credentials on purpose, and generated files cannot keep a suppression
 comment. Biome runs it on JavaScript and TypeScript only, so lock files and JSON are not checked.
 
 The spread rule is a warning and skips tests and the `testing/`, `scripts/`, `bench/` and
 `performance/` folders. Lint cannot tell a list of three from a list of a million, and most
 spreads are over small lists. Fix the ones over user data by looping; leave the rest.
+
+Biome prints the first 20 diagnostics, so in a repository with many spread warnings an error can be
+counted but not shown; `biome check --diagnostic-level=error .` lists errors only.
 
 Suppress a reviewed site with the reason:
 `// biome-ignore lint/security/noSecrets: Crockford base32 alphabet, not a key`, or
@@ -133,8 +138,8 @@ How a security audit of these repositories is run lives in cli-testing:
 [METHOD.md](https://github.com/WireCatLabs/cli-testing/blob/main/docs/security/METHOD.md) (scope
 and tools), [RUNBOOK.md](https://github.com/WireCatLabs/cli-testing/blob/main/docs/security/RUNBOOK.md)
 (the steps) and [LESSONS.md](https://github.com/WireCatLabs/cli-testing/blob/main/docs/security/LESSONS.md)
-(how the tools behave, learned the hard way). Each repository's contributor documentation links
-there rather than restating it.
+(how the tools behave, learned the hard way). Link these from each repository's contributor
+documentation rather than restating them.
 
 ## Size limits
 
