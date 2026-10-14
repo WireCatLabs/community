@@ -94,6 +94,48 @@ PR security is the fast Gitleaks secret check; hosted push protection prevents c
 
 Repositories without a package release use a manual security-release workflow; the documentation site's production deployment is its release boundary. Hosted secret-scanning availability can differ for private repositories, so record coverage gaps rather than claiming protection that the service does not provide.
 
+### Lint rules
+
+The shared Biome base adds these to the `recommended` preset's `noGlobalEval` and `noBlankTarget`
+(and `noDangerouslySetInnerHtml` where the React domain is on). The plugins are GritQL files copied
+into `config/wirecat/` with the base. They run with the rest of Biome in the commit hook and PR CI.
+
+| Rule | Level | Catches |
+| --- | --- | --- |
+| `security/noSecrets` | error | High-entropy strings and known token shapes, before gitleaks sees the commit |
+| `plugin/no-shell-true` | error | `shell: true` in a `spawn`, `exec`, `execFile` or `fork` call (and their `Sync` forms) |
+| `plugin/no-exec-interpolation` | error | `exec` or `execSync` given a template literal with `${}` or a `+` concatenation |
+| `plugin/no-new-function` | error | `new Function(...)` and `Function(...)` |
+| `plugin/no-unbounded-spread` | warning | `.push(...x)`, `Math.max(...x)`, `Math.min(...x)` (see [Size limits](#size-limits)) |
+
+`noSecrets` uses an entropy threshold of 50, not Biome's default of 41. The default flags hundreds of
+identifiers, Cyrillic strings and generated API descriptions. At 50 it still catches GitHub, AWS, Slack,
+Google, OpenAI, Anthropic, Telegram bot and Stripe keys and JWTs. Short hex and base64 values fall
+below it; gitleaks covers them. It is off for test files, `test/`, `tests/`, `__tests__/`, `fixtures/` and
+`generated/`. Tests carry fake credentials on purpose, and generated files cannot keep a suppression
+comment. Biome runs it on JavaScript and TypeScript only, so lock files and JSON are not checked.
+
+The spread rule is a warning and skips tests and the `testing/`, `scripts/`, `bench/` and
+`performance/` folders. Lint cannot tell a list of three from a list of a million, and most
+spreads are over small lists. Fix the ones over user data by looping; leave the rest.
+
+Suppress a reviewed site with the reason:
+`// biome-ignore lint/security/noSecrets: Crockford base32 alphabet, not a key`, or
+`// biome-ignore lint/plugin/no-shell-true: Windows .cmd shim, fixed arguments`.
+
+The plugins match syntax, not data flow. They miss options or commands held in a variable,
+a renamed `child_process` import (`proc.exec`), `util.promisify(exec)`, and
+`shell: process.platform === "win32"`. Review and CodeQL at release cover those.
+
+### Audit method
+
+How a security audit of these repositories is run lives in cli-testing:
+[METHOD.md](https://github.com/WireCatLabs/cli-testing/blob/main/docs/security/METHOD.md) (scope
+and tools), [RUNBOOK.md](https://github.com/WireCatLabs/cli-testing/blob/main/docs/security/RUNBOOK.md)
+(the steps) and [LESSONS.md](https://github.com/WireCatLabs/cli-testing/blob/main/docs/security/LESSONS.md)
+(how the tools behave, learned the hard way). Each repository's contributor documentation links
+there rather than restating it.
+
 ## Size limits
 
 Code that handles user data must keep working when that data is large. Never spread an
