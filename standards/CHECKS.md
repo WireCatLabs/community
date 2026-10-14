@@ -9,7 +9,7 @@ local hooks are synchronized. Timing ranges are a guide, not a deadline guarante
 
 | When | Check | What it examines | Rough cost |
 | --- | --- | --- | --- |
-| Commit | Biome | Only staged JS, TS, and JSON files; formatting, syntax, lint rules, and project import restrictions | Usually well under 1 second |
+| Commit | Biome | Only staged JS, TS, and JSON files; formatting, syntax, lint rules, security plugins, and project import restrictions | Usually well under 1 second |
 | Commit | Gitleaks | Only staged changes; detects accidentally committed credentials | Usually well under 1 second |
 | Push | None | No config integrity, typecheck, build, parity, or test hook | No check overhead |
 
@@ -28,7 +28,7 @@ required locally by default. Developers can run a targeted check when they need 
 | Check | Purpose | Rough cost after setup |
 | --- | --- | --- |
 | Config integrity | Verify copied preset hashes, pinned tools, and root config bindings | Less than 1 second |
-| Repository Biome | Apply the shared code rules and local architecture restrictions | About 1–3 seconds |
+| Repository Biome | Apply the shared code rules, security plugins, and local architecture restrictions | About 1–3 seconds; the security plugins add about half again in CPU time (cli-core measured 18 → 29 CPU-seconds) |
 | Markdown lint | Check configured documentation for missing code-fence languages, tabs, and empty links | About 1–3 seconds |
 | Early bug checks (`ci:quick`) | CLI typechecking, or the docs site's synthetic unit suite | Allow about 5–30 seconds for typechecks; docs tests previously took about 8 seconds |
 | New-commit secret scan | Scan the PR or push commit range, rather than all historical commits | About 1–3 seconds, including fetching the scanner |
