@@ -30,6 +30,9 @@ jobs:
       - run: pnpm standards:check
       - run: pnpm lint
       - run: pnpm docs:lint
+      - name: Early bug checks
+        timeout-minutes: 2
+        run: pnpm run --if-present ci:quick
       - name: Scan new commits for secrets
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
