@@ -30,6 +30,9 @@ jobs:
       - run: pnpm standards:check
       - run: pnpm lint
       - run: pnpm docs:lint
+      - name: Check shared release tooling
+        timeout-minutes: 2
+        run: pnpm ci:quick
       - name: Early bug checks
         timeout-minutes: 2
         run: pnpm run --if-present ci:quick

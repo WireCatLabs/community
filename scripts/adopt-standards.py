@@ -9,6 +9,16 @@ import re
 import shutil
 import subprocess
 
+RELEASE_LOCK_FILES = ("release-lock.sh", "release-lock-info.mjs")
+
+
+def copy_presets(paths, managed):
+    hashes = {}
+    for path in paths:
+        shutil.copyfile(path, managed / path.name)
+        hashes[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashes
+
 
 def read_json(path, default):
     return json.loads(path.read_text()) if path.exists() else default
@@ -22,6 +32,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("repository", type=Path)
     parser.add_argument("--revision", help="source commit; defaults to this checkout's HEAD")
+    parser.add_argument("--only", choices=["release-lock"], help="update only the release lock in an existing adoption")
     args = parser.parse_args()
     source = Path(__file__).resolve().parent.parent
     target = args.repository.resolve()
@@ -31,13 +42,22 @@ def main():
     revision = args.revision or subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=source, text=True
     ).strip()
+    if args.only:
+        managed = target / "config/wirecat"
+        manifest_path = managed / "manifest.json"
+        manifest = read_json(manifest_path, None)
+        if manifest is None:
+            parser.error("Scoped updates require an existing standards adoption")
+        hashes = copy_presets([source / "standards/configs" / name for name in RELEASE_LOCK_FILES], managed)
+        manifest["files"].update(hashes)
+        manifest.setdefault("fileRevisions", {}).update({name: revision for name in hashes})
+        write_json(manifest_path, manifest)
+        print(f"Applied shared release lock to {target}; toolchain and other presets unchanged.")
+        return
     toolchain = read_json(source / "standards/toolchain.json", {})
     managed = target / "config/wirecat"
     managed.mkdir(parents=True, exist_ok=True)
-    hashes = {}
-    for path in sorted((source / "standards/configs").iterdir()):
-        shutil.copyfile(path, managed / path.name)
-        hashes[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    hashes = copy_presets(sorted((source / "standards/configs").iterdir()), managed)
     checker = source / "standards/scripts/check.mjs"
     shutil.copyfile(checker, managed / "check.mjs")
     hashes["check.mjs"] = hashlib.sha256(checker.read_bytes()).hexdigest()
