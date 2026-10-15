@@ -41,6 +41,43 @@ configs; general improvements belong in this repository and are adopted through
 reviewed updates. The installer changes files only: it does not install packages,
 run hooks, push commits, publish releases, or rewrite application code.
 
+### Release locking
+
+Use the shared lock helper in a CLI's release script to serialize releases on one
+machine and distinguish observed lock holders from an old release label. It runs
+before package builds and needs no installed CLI dependencies.
+
+For an existing standards adoption, update just this helper:
+
+```sh
+python3 scripts/adopt-standards.py /path/to/project --only release-lock
+```
+
+This preserves other presets, toolchain pins and package files. The manifest's
+`fileRevisions` records the source revision for these individual files; its root
+`revision` continues to identify the last full adoption. Full adoption includes
+the helper too and resets this per-file provenance to the new common revision.
+
+After the release script has changed to the repository root and checked its
+arguments and source state, source and call the helper in that same shell:
+
+```sh
+. ./config/wirecat/release-lock.sh
+wirecat_release_lock
+```
+
+It retains the existing `${XDG_RUNTIME_DIR:-/tmp}/leemour-release.lock` and FD9
+protocol. The default wait is zero; an explicit nonnegative integer argument sets
+the maximum wait in seconds. A script that waits must recheck source state after
+acquisition. Keep FD9 open until the release and its child commands finish.
+
+On contention, stderr names the lock path, observed kernel holders when Linux
+`lslocks` is available, and the separately labelled last recorded release, which
+may be stale. Waiters are excluded. Command names are shown without process
+arguments. Missing or older diagnostic tools do not authorize a release; `flock`
+alone decides acquisition. Let the holder finish, then retry. Removing the lock
+file creates another inode and can allow simultaneous releases.
+
 ## CI and hooks
 
 See [the check schedule and timing guide](CHECKS.md) for what each check does and
