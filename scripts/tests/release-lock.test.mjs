@@ -33,10 +33,12 @@ test("holders, waiters and advisory labels stay distinct", () => {
       row({ pid: 456, mode: "WRITE*" }),
       row({ pid: 789, type: "POSIX" }),
       row({ holders: ["123,sh,9", "321,flock,9"] }),
+      row({ pid: 654, mode: "READ" }),
       row({ path: "/other/lock", pid: 999 }),
     ]),
   )
   assert.match(text, /Observed lock holders.*pid 123.*pid 321/)
+  assert.match(text, /pid 654/)
   assert.doesNotMatch(text.split("\n")[1], /456|789|999/)
   assert.match(text, /Last recorded release \(may be stale\).*456/)
   assert.match(text, /Do not remove the lock file/)

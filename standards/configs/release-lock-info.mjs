@@ -29,13 +29,14 @@ export function releaseLockInfo(path, { run = execFileSync, realpath = realpathS
       try {
         if (row.type !== "FLOCK" || row.mode?.endsWith("*")) continue
         if (realpath(row.path) !== realpath(path)) continue
+        const before = holders.size
         if (Array.isArray(row.holders)) {
           for (const holder of row.holders) {
             const match = /^(\d+),([^,]+),\d+$/.exec(holder)
             if (match && Number(match[1]) > 0) holders.add(`pid ${match[1]} (${safe(match[2])})`)
           }
         }
-        if (holders.size === 0 && Number.isInteger(row.pid) && row.pid > 0)
+        if (holders.size === before && Number.isInteger(row.pid) && row.pid > 0)
           holders.add(`pid ${row.pid} (${safe(row.command)})`)
       } catch {
         // A holder may exit while the snapshot is read, or hide its path.
