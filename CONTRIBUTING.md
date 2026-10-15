@@ -6,3 +6,5 @@ with `git commit -s` after reading the DCO. Repository-specific instructions tak
 precedence.
 
 [Read the full policy](https://github.com/WireCatLabs/community/blob/main/contributing/README.md).
+
+Security audits follow the shared [security method](https://github.com/WireCatLabs/cli-testing/tree/main/docs/security) in cli-testing.
