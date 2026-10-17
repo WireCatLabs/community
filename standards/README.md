@@ -4,6 +4,11 @@ Use these presets for WireCat JavaScript and TypeScript repositories. They bring
 the tools used by cli-docs into one reviewed baseline, while keeping application
 rules and generated-file exclusions in each project's root configuration.
 
+The rules themselves (tools, CI, releases, documents and the rest) live in the
+[WireCat CLI standards handbook](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/README.md) in cli-base. This repository is the
+source of the presets those rules point to; when this page and the handbook disagree,
+the handbook holds and this page is the one to fix.
+
 | Tool | Shared settings | Project settings |
 | --- | --- | --- |
 | Biome | Formatting, recommended rules, strict unused-code and type rules | Architecture boundaries, framework options, generated files |
@@ -96,8 +101,9 @@ Fast CI uses one cached dependency installation with lifecycle scripts disabled.
 New commits cancel superseded fast runs. Runner queues and cold downloads are
 outside the check-time budget, so total GitHub turnaround is not guaranteed.
 
-Projects define `ci:quick` in their package scripts: existing typechecking for CLI packages,
-synthetic unit tests for the docs site. This step has a two-minute failure ceiling.
+Projects define `ci:quick` in their package scripts: a typecheck in every package, plus a build and
+the command lint in most CLIs, and synthetic unit tests for the docs site. What each repository
+runs is listed in [WC-CI-4](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/ci.md). This step has a two-minute failure ceiling.
 The shared template allows projects without that script to adopt static checks alone;
 review their early bug checks when onboarding. Do not put live-account or agent suites here.
 
