@@ -1,9 +1,9 @@
 # Check schedule and rough timings
 
-This is the proposed development policy in
-[community PR2](https://github.com/WireCatLabs/community/pull/2) and the ten project
-rollout PRs. It takes effect in a project when its changes are merged and its
-local hooks are synchronized. Timing ranges are a guide, not a deadline guarantee.
+What each check examines and roughly how long it takes. The rules for what runs
+where are in the WireCat CLI standards handbook, on its [CI page](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/ci.md)
+(`WC-CI-…`); this page adds the details and the costs. Timing ranges are a guide,
+not a deadline guarantee.
 
 ## Local development
 
@@ -23,14 +23,14 @@ manual investigation, but agents and hooks must not run it on each commit or pus
 No full repository lint, spelling, generation, build, typecheck, or test suite is
 required locally by default. Developers can run a targeted check when they need it.
 
-## Pull requests and ordinary main-branch CI
+## Pull requests and the fast job on `main`
 
 | Check | Purpose | Rough cost after setup |
 | --- | --- | --- |
 | Config integrity | Verify copied preset hashes, pinned tools, and root config bindings | Less than 1 second |
 | Repository Biome | Apply the shared code rules, security plugins, and local architecture restrictions | About 1–3 seconds; the security plugins add about half again in CPU time (cli-core measured 18 → 29 CPU-seconds) |
 | Markdown lint | Check configured documentation for missing code-fence languages, tabs, and empty links | About 1–3 seconds |
-| Early bug checks (`ci:quick`) | CLI typechecking, or the docs site's synthetic unit suite | Allow about 5–30 seconds for typechecks; docs tests previously took about 8 seconds |
+| Early bug checks (`ci:quick`) | A typecheck, and in most CLIs a build and the command lint; the docs site's synthetic unit suite (WC-CI-4) | Allow about 5–30 seconds for type checks; docs tests previously took about 8 seconds |
 | New-commit secret scan | Scan the PR or push commit range, rather than all historical commits | About 1–3 seconds, including fetching the scanner |
 
 The job does one cached dependency installation with lifecycle scripts disabled.
@@ -39,11 +39,12 @@ Observed complete jobs across the ten projects took about 15–40 seconds; the
 community job took about 13 seconds. Runner queues and cold downloads can add time.
 Superseded fast runs are cancelled when another commit arrives.
 
-The updated profile adds a bounded early-bug step: the nine CLI packages run their existing
-typecheck; the docs site runs its synthetic unit tests. Allow about 20–70 seconds for ordinary
+The early-bug step runs what [WC-CI-4](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/ci.md) lists for each repository:
+a typecheck in every package, plus a build and the command lint in tg, max, memo, wa and drive;
+the docs site runs its synthetic unit tests. Allow about 20–70 seconds for ordinary
 CI depending on the package. First successful updated jobs took 17–34 seconds, with community
 at 14 seconds; these include the early-bug step and exclude queue time. The step has a two-minute
-failure ceiling. Local CLI typechecks passed in about 1–6 seconds each. The docs command-group
+failure ceiling. Local CLI type checks passed in about 1–6 seconds each. The docs command-group
 test needs generated references and remains in full validation; the other 31 files run in fast CI.
 Heavy test suites, coverage, builds, documentation generation, parity,
 browser suites, OS matrices, and native-library builds remain in full validation.
@@ -55,7 +56,7 @@ Third-party security apps may post independent checks as well.
 The five-minute job timeout is a failure ceiling for stalled setup, not an expected
 duration. A cold install is not promised to finish within the observed range.
 
-## Releases, monthly checks, and explicitly requested full validation
+## Each merge to `main`, releases, monthly checks, and requested full validation
 
 | Check group | What it covers | Rough scale |
 | --- | --- | --- |
@@ -65,6 +66,11 @@ duration. A cold install is not promised to finish within the observed range.
 | Platform/install checks | Windows/macOS/Linux behavior, supported Node versions, package installation | Several minutes; queues and cold installs vary |
 | Site browsers/export | Browser flows, responsive behavior, accessibility/SEO/link checks, and production export | Several minutes; a full site pipeline can take 10–20 minutes |
 | Release security | Dependency/workflow audits, full source scanning such as CodeQL, and the full-history secret scan | Seconds to several minutes; source scanning can dominate |
+
+Each merge to `main` runs full validation once, on Linux, without the platform/install
+checks and without publishing ([WC-CI-7](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/ci.md)). cli-docs runs its full validation
+before each deployment instead, and community has no build to validate. Releases, monthly
+runs and manual requests add the platform suites.
 
 For context, earlier local coverage runs took about 3 seconds for cli-base,
 1 second for cli-meetings, 1 minute each for Telegram/MAX, and 2–3 minutes for
