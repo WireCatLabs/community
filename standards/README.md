@@ -93,7 +93,7 @@ rough costs.
 | Commit | Biome on staged files and staged secret detection |
 | Push | No local checks |
 | PR / main CI (fast job) | Preset integrity, Biome, Markdown lint, critical secret detection, and bounded `ci:quick` bug checks |
-| PR validation (`pr.yml`) | Full validation on Linux: typecheck, tests and coverage floor, build, Bun, documentation contracts, parity. No platform suites; superseded runs are cancelled |
+| PR validation ([`pr.yml` template](templates/pr.yml)) | Full validation on Linux: typecheck, tests and coverage floor, build, Bun, documentation contracts, parity. No platform suites; superseded runs are cancelled |
 | Push to `main` (each merge) | The same full validation on Linux again, to catch merge skew between PRs. No platform suites, no publishing |
 | Release / monthly / manual full validation | Typecheck, tests and coverage, build, Bun, documentation contracts, parity, platform and browser suites, heavy security |
 
@@ -108,6 +108,8 @@ runs is listed in [WC-CI-4](https://github.com/WireCatLabs/cli-base/blob/main/do
 The shared template allows projects without that script to adopt static checks alone;
 review their early bug checks when onboarding. Do not put live-account or agent suites here.
 
+The [pull request validation template](templates/pr.yml) calls a project's `ci.yml` on every PR with
+platform suites skipped; drop its `with:` block where `ci.yml` has no `skip-platforms` input.
 The [monthly workflow template](templates/monthly.yml) calls a project's existing `ci.yml`
 and pinned release-security workflow without publishing. Adjust its cron to stagger new projects
 and its CodeQL languages to match their source. The
