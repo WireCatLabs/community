@@ -46,8 +46,12 @@ CI depending on the package. First successful updated jobs took 17–34 seconds,
 at 14 seconds; these include the early-bug step and exclude queue time. The step has a two-minute
 failure ceiling. Local CLI type checks passed in about 1–6 seconds each. The docs command-group
 test needs generated references and remains in full validation; the other 31 files run in fast CI.
-Heavy test suites, coverage, builds, documentation generation, parity,
-browser suites, OS matrices, and native-library builds remain in full validation.
+Beside the fast job, every PR runs the full Linux validation through `pr.yml`
+([WC-CI-5](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/ci.md)): the project's
+`ci.yml` with platform suites skipped, so tests, the coverage floor, contracts, documentation and
+parity fail before merge rather than on `main`. A new commit cancels the superseded run. Measured
+on 2026-10-18, it takes about 2.5 minutes: wa 148 s, tg 145 s, max 164 s. Browser suites, OS
+matrices, and native-library builds remain in release, monthly and manual full validation.
 Some repositories also have a separate mandatory secret-security workflow. Its
 current pinned implementation scans Git history, so that extra job can take
 longer than the new-commit scan; it does not run tests, builds, or typechecking.
@@ -56,7 +60,7 @@ Third-party security apps may post independent checks as well.
 The five-minute job timeout is a failure ceiling for stalled setup, not an expected
 duration. A cold install is not promised to finish within the observed range.
 
-## Each merge to `main`, releases, monthly checks, and requested full validation
+## Pull request validation, each merge to `main`, releases, monthly checks, and requested full validation
 
 | Check group | What it covers | Rough scale |
 | --- | --- | --- |
@@ -67,8 +71,9 @@ duration. A cold install is not promised to finish within the observed range.
 | Site browsers/export | Browser flows, responsive behavior, accessibility/SEO/link checks, and production export | Several minutes; a full site pipeline can take 10–20 minutes |
 | Release security | Dependency/workflow audits, full source scanning such as CodeQL, and the full-history secret scan | Seconds to several minutes; source scanning can dominate |
 
-Each merge to `main` runs full validation once, on Linux, without the platform/install
-checks and without publishing ([WC-CI-7](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/ci.md)). cli-docs runs its full validation
+Each pull request and each merge to `main` run full validation on Linux, without the
+platform/install checks and without publishing; the run on `main` catches merge skew between
+pull requests (WC-CI-5 and [WC-CI-7](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/ci.md)). cli-docs runs its full validation
 before each deployment instead, and community has no build to validate. Releases, monthly
 runs and manual requests add the platform suites.
 

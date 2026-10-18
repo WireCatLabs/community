@@ -92,8 +92,9 @@ rough costs.
 | --- | --- |
 | Commit | Biome on staged files and staged secret detection |
 | Push | No local checks |
-| PR / main CI | Preset integrity, Biome, Markdown lint, critical secret detection, and bounded `ci:quick` bug checks |
-| Push to `main` (each merge) | Full validation on Linux: typecheck, tests and coverage, build, Bun, documentation contracts, parity. Not on PR branches; no platform suites, no publishing |
+| PR / main CI (fast job) | Preset integrity, Biome, Markdown lint, critical secret detection, and bounded `ci:quick` bug checks |
+| PR validation ([`pr.yml` template](templates/pr.yml)) | Full validation on Linux: typecheck, tests and coverage floor, build, Bun, documentation contracts, parity. No platform suites; superseded runs are cancelled |
+| Push to `main` (each merge) | The same full validation on Linux again, to catch merge skew between PRs. No platform suites, no publishing |
 | Release / monthly / manual full validation | Typecheck, tests and coverage, build, Bun, documentation contracts, parity, platform and browser suites, heavy security |
 
 Hooks must not install dependencies, build, typecheck, generate files, or run tests.
@@ -107,6 +108,8 @@ runs is listed in [WC-CI-4](https://github.com/WireCatLabs/cli-base/blob/main/do
 The shared template allows projects without that script to adopt static checks alone;
 review their early bug checks when onboarding. Do not put live-account or agent suites here.
 
+The [pull request validation template](templates/pr.yml) calls a project's `ci.yml` on every PR with
+platform suites skipped; drop its `with:` block where `ci.yml` has no `skip-platforms` input.
 The [monthly workflow template](templates/monthly.yml) calls a project's existing `ci.yml`
 and pinned release-security workflow without publishing. Adjust its cron to stagger new projects
 and its CodeQL languages to match their source. The
@@ -120,8 +123,11 @@ jobs retain their own environment checks. Offline CLI contracts belong in full v
 with plans and reviewed snapshots described in
 [cli-testing](https://github.com/WireCatLabs/cli-testing/blob/main/docs/ci/CONTRACTS.md).
 Site deployment remains a release operation with full
-browser and export validation. Heavy platform and parity workflows are called by
-full validation and remain available manually; they do not run for ordinary PRs.
+browser and export validation. Every PR runs the full Linux validation through `pr.yml`, which calls the
+project's `ci.yml` with platform suites skipped
+([WC-CI-5](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/ci.md)). Platform
+and browser suites are called by release, monthly and manual full validation; they do not run
+for ordinary PRs.
 Third-party security apps may post independent checks outside these YAML workflows.
 
 Install local hooks with `pnpm exec lefthook install`. A missing gitleaks binary
