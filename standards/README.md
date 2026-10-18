@@ -131,6 +131,21 @@ available for documentation edits without forcing every commit to scan all docs.
 Node 24 is used in CI; projects retain their own minimum supported Node runtime
 and TypeScript settings. Framework options and architecture restrictions stay local.
 
+### Structure rules
+
+The shared Biome base also holds three rules every repository used to copy into its own `biome.json`:
+
+| Rule | Level | Catches |
+| --- | --- | --- |
+| `suspicious/noImportCycles` | error | Two modules that import each other, directly or through others |
+| `style/noExcessiveLinesPerFile` | error | A file over 1,000 lines; off for tests, `fixtures/` and `generated/` |
+| `plugin/no-deep-wirecat-import` | error | An import from `@wirecat/<package>/src/…` or `/dist/…`; tests may reach inside |
+
+A repository's own `biome.json` is applied after the base, so a lower cap for the repository or a higher one
+for a single file goes there. The deep-import rule is a plugin, not `noRestrictedImports`: Biome lets the last
+override that sets a rule win, so a base `noRestrictedImports` would be replaced by the first layer rule a
+repository writes, while plugins from the base and the repository add up.
+
 ## Security checks
 
 PR security is the fast Gitleaks secret check; hosted push protection prevents credential exposure. Heavy security checks run before package publication or production deployment, monthly, or on demand. Reuse the pinned cli-base `release-checks.yml` workflow and make publication depend on it. Production dependency audit and CodeQL block critical findings; noncritical findings are reviewed by the owner. Workflow analysis reports findings and fails if the scanner itself cannot complete. Do not add heavyweight source scanners to edit/Stop hooks or ordinary PR jobs. Tests, coverage and compatibility checks follow the release/monthly/manual schedule above.
