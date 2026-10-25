@@ -72,7 +72,7 @@ arguments and source state, source and call the helper in that same shell:
 wirecat_release_lock
 ```
 
-It locks `${XDG_RUNTIME_DIR:-/tmp}/leemour-release-<key>.lock` on FD9, where
+It locks `${XDG_RUNTIME_DIR:-/tmp}/wirecat-release-<key>.lock` on FD9, where
 `<key>` is the `name` in `./package.json` made filename-safe
 (`@wirecat/cli-core` becomes `wirecat-cli-core`). The key is the package, not the
 folder, so every checkout and worktree of one package shares a lock. A missing or
