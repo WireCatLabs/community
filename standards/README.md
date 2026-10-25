@@ -11,7 +11,7 @@ the handbook holds and this page is the one to fix.
 
 | Tool | Shared settings | Project settings |
 | --- | --- | --- |
-| Biome | Formatting, recommended rules, strict unused-code and type rules | Architecture boundaries, framework options, generated files |
+| Biome | Formatting, recommended rules, strict unused-code and type rules; Markdown left to markdownlint | Architecture boundaries, framework options, generated files |
 | markdownlint-cli2 | Tabs, blank lines, fenced-code languages, empty links | Documents to check and additional rules |
 | CSpell | English, British English, Russian, Spanish, WireCat vocabulary | Documentation scope and project vocabulary |
 | Lefthook | Staged Biome and optional secret scan; no push hook | Additional project hooks |
@@ -157,11 +157,12 @@ for a single file goes there. The deep-import rule is a plugin, not `noRestricte
 override that sets a rule win, so a base `noRestrictedImports` would be replaced by the first layer rule a
 repository writes, while plugins from the base and the repository add up.
 
-cli-core owns the store, so it turns `no-sqlite-driver` off in its own `biome.json` by repeating the plugin with
-no files; the other plugins keep running:
+cli-core owns the store, so each of its driver files opens with a suppression; the other plugins keep running.
+Since Biome 2.6 a repository's `plugins` entry adds to the base instead of replacing it, so repeating the
+plugin with no files no longer turns it off:
 
-```json
-{ "plugins": [{ "path": "./config/wirecat/no-sqlite-driver.grit", "includes": [] }] }
+```ts
+// biome-ignore-all lint/plugin/no-sqlite-driver: cli-core owns the store, so it opens the driver itself
 ```
 
 ## Security checks
