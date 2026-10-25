@@ -139,18 +139,26 @@ and TypeScript settings. Framework options and architecture restrictions stay lo
 
 ### Structure rules
 
-The shared Biome base also holds three rules every repository used to copy into its own `biome.json`:
+The shared Biome base also holds these structure rules:
 
 | Rule | Level | Catches |
 | --- | --- | --- |
 | `suspicious/noImportCycles` | error | Two modules that import each other, directly or through others |
 | `style/noExcessiveLinesPerFile` | error | A file over 1,000 lines; off for tests, `fixtures/` and `generated/` |
 | `plugin/no-deep-wirecat-import` | error | An import from `@wirecat/<package>/src/…` or `/dist/…`; tests may reach inside |
+| `plugin/no-sqlite-driver` | error | An import of `node:sqlite`, `bun:sqlite`, `better-sqlite3` or `drizzle-orm`: the shared store belongs to cli-core ([WC-STORE-5](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/store.md#wc-store-5--a-cli-writes-no-sql-against-the-shared-store)); tests may open SQLite |
 
 A repository's own `biome.json` is applied after the base, so a lower cap for the repository or a higher one
 for a single file goes there. The deep-import rule is a plugin, not `noRestrictedImports`: Biome lets the last
 override that sets a rule win, so a base `noRestrictedImports` would be replaced by the first layer rule a
 repository writes, while plugins from the base and the repository add up.
+
+cli-core owns the store, so it turns `no-sqlite-driver` off in its own `biome.json` by repeating the plugin with
+no files; the other plugins keep running:
+
+```json
+{ "plugins": [{ "path": "./config/wirecat/no-sqlite-driver.grit", "includes": [] }] }
+```
 
 ## Security checks
 
