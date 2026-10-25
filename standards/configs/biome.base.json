@@ -129,7 +129,12 @@
         "!**/test/**",
         "!**/tests/**",
         "!**/__tests__/**",
-        "!**/fixtures/**"
+        "!**/fixtures/**",
+        "!**/testing/**",
+        "!**/scripts/**",
+        "!**/bench/**",
+        "!**/performance/**",
+        "!**/contracts/**"
       ]
     },
     {
