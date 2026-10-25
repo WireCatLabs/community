@@ -48,8 +48,9 @@ run hooks, push commits, publish releases, or rewrite application code.
 
 ### Release locking
 
-Use the shared lock helper in a CLI's release script to serialize releases on one
-machine and distinguish observed lock holders from an old release label. It runs
+Use the shared lock helper in a CLI's release script to serialize releases of one
+npm package on a machine and distinguish observed lock holders from an old release
+label. Releases of different packages may run at once. It runs
 before package builds and needs no installed CLI dependencies.
 
 For an existing standards adoption, update just this helper:
@@ -71,8 +72,11 @@ arguments and source state, source and call the helper in that same shell:
 wirecat_release_lock
 ```
 
-It retains the existing `${XDG_RUNTIME_DIR:-/tmp}/leemour-release.lock` and FD9
-protocol. The default wait is zero; an explicit nonnegative integer argument sets
+It locks `${XDG_RUNTIME_DIR:-/tmp}/leemour-release-<key>.lock` on FD9, where
+`<key>` is the `name` in `./package.json` made filename-safe
+(`@wirecat/cli-core` becomes `wirecat-cli-core`). The key is the package, not the
+folder, so every checkout and worktree of one package shares a lock. A missing or
+unusable name refuses the release. The default wait is zero; an explicit nonnegative integer argument sets
 the maximum wait in seconds. A script that waits must recheck source state after
 acquisition. Keep FD9 open until the release and its child commands finish.
 

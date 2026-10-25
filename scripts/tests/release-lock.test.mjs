@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { execFileSync, spawn, spawnSync } from "node:child_process"
 import { once } from "node:events"
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
+import { cpSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { test } from "node:test"
@@ -94,16 +94,18 @@ test("paths and labels escape terminal controls; snapshots do not need a label",
   )
 })
 
-function fixture(t) {
+function fixture(t, { name = "@wirecat/fixture", runtime } = {}) {
   const directory = mkdtempSync(join(tmpdir(), "wirecat release lock "))
   t.after(() => rmSync(directory, { recursive: true, force: true }))
   mkdirSync(join(directory, "config/wirecat"), { recursive: true })
-  for (const name of ["release-lock.sh", "release-lock-info.mjs"])
-    cpSync(join(root, "standards/configs", name), join(directory, "config/wirecat", name))
+  for (const file of ["release-lock.sh", "release-lock-info.mjs"])
+    cpSync(join(root, "standards/configs", file), join(directory, "config/wirecat", file))
+  if (name !== null) writeFileSync(join(directory, "package.json"), JSON.stringify({ name, type: "module" }))
+  const runtimeDirectory = runtime ?? directory
   return {
     directory,
-    lock: join(directory, "leemour-release.lock"),
-    options: { cwd: directory, env: { ...process.env, XDG_RUNTIME_DIR: directory }, encoding: "utf8" },
+    lock: join(runtimeDirectory, "leemour-release-wirecat-fixture.lock"),
+    options: { cwd: directory, env: { ...process.env, XDG_RUNTIME_DIR: runtimeDirectory }, encoding: "utf8" },
   }
 }
 const invoke = (options, tail = "", args = []) =>
@@ -147,7 +149,7 @@ test("real contention preserves the inode and refuses before executing release w
 
 test("the lock remains held across child commands and is available after exit", async (t) => {
   const { options } = fixture(t)
-  const first = invoke(options, "sh -c 'if flock -n ./leemour-release.lock true; then exit 7; fi'")
+  const first = invoke(options, "sh -c 'if flock -n ./leemour-release-wirecat-fixture.lock true; then exit 7; fi'")
   assert.equal(first.status, 0)
   assert.equal(invoke(options, "printf released").stdout, "released")
   const child = await holder(t, options)
@@ -163,6 +165,41 @@ test("the lock remains held across child commands and is available after exit", 
   const [code] = await once(waiting, "close")
   assert.equal(code, 0)
   assert.equal(Buffer.concat(output).toString(), "acquired")
+})
+
+test("two checkouts of one package share a lock; different packages do not", async (t) => {
+  const runtime = mkdtempSync(join(tmpdir(), "wirecat release runtime "))
+  t.after(() => rmSync(runtime, { recursive: true, force: true }))
+  await holder(t, fixture(t, { runtime }).options)
+  const sameResult = invoke(fixture(t, { runtime }).options, "printf published")
+  assert.equal(sameResult.status, 1)
+  assert.equal(sameResult.stdout, "")
+  assert.match(sameResult.stderr, /leemour-release-wirecat-fixture\.lock/)
+  const other = invoke(fixture(t, { runtime, name: "@wirecat/other" }).options, "printf published")
+  assert.equal(other.status, 0)
+  assert.equal(other.stdout, "published")
+  assert.match(readFileSync(join(runtime, "leemour-release-wirecat-other.lock.who"), "utf8"), /pid/)
+})
+
+test("the lock key is the package name made filename-safe", (t) => {
+  const { directory, options } = fixture(t, { name: "@scope/odd name:1" })
+  assert.equal(invoke(options).status, 0)
+  statSync(join(directory, "leemour-release-scope-odd-name-1.lock"))
+})
+
+test("a missing or unusable package name refuses instead of sharing a lock", (t) => {
+  for (const body of [null, "{", "{}", '{"name":""}', '{"name":7}', '{"name":"@"}']) {
+    const { directory, options } = fixture(t, { name: null })
+    if (body !== null) writeFileSync(join(directory, "package.json"), body)
+    const result = invoke(options, "printf published")
+    assert.equal(result.status, 1)
+    assert.equal(result.stdout, "")
+    assert.match(result.stderr, /package name/)
+    assert.deepEqual(
+      readdirSync(directory).filter((file) => file.includes("leemour-release")),
+      [],
+    )
+  }
 })
 
 test("invalid waits fail before opening a lock or running release work", (t) => {
