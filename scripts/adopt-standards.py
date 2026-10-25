@@ -25,6 +25,9 @@ def read_json(path, default):
 
 
 def write_json(path, data):
+    # Rewriting an unchanged file would replace the repository's own formatting with ours.
+    if read_json(path, None) == data:
+        return
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
 
 
@@ -122,9 +125,11 @@ def main():
     scripts.setdefault("docs:spell", "cspell lint --config cspell.json --no-progress README.md")
     scripts.setdefault("prepare", "lefthook install || true")
     write_json(target / "package.json", package)
+    # The template only starts a repository off; most then grow their own steps and newer action pins.
     workflow = target / ".github/workflows/standards.yml"
-    workflow.parent.mkdir(parents=True, exist_ok=True)
-    workflow.write_text((source / "standards/templates/standards.yml").read_text())
+    if not workflow.exists():
+        workflow.parent.mkdir(parents=True, exist_ok=True)
+        workflow.write_text((source / "standards/templates/standards.yml").read_text())
     print(f"Applied shared standards to {target}; run pnpm install to update its lockfile.")
 
 

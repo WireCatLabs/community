@@ -269,6 +269,23 @@ test("full adoption includes the helper and resets scoped provenance", (t) => {
   }
 })
 
+test("re-adoption keeps the repository's formatting and its own standards workflow", (t) => {
+  const { directory } = fixture(t)
+  const adopt = () => execFileSync("python3", [join(root, "scripts/adopt-standards.py"), directory, "--revision", "r"])
+  writeFileSync(join(directory, "package.json"), '{"name":"fixture","private":true}\n')
+  adopt()
+  const compact = (path) => JSON.stringify(JSON.parse(readFileSync(join(directory, path), "utf8")))
+  for (const path of ["biome.json", "cspell.json"]) writeFileSync(join(directory, path), compact(path))
+  writeFileSync(join(directory, ".github/workflows/standards.yml"), "name: own\n")
+
+  adopt()
+
+  for (const path of ["biome.json", "cspell.json"]) {
+    assert.equal(readFileSync(join(directory, path), "utf8"), compact(path))
+  }
+  assert.equal(readFileSync(join(directory, ".github/workflows/standards.yml"), "utf8"), "name: own\n")
+})
+
 test("scoped adoption refuses an uninitialized target", (t) => {
   const { directory } = fixture(t)
   writeFileSync(join(directory, "package.json"), '{"name":"fixture"}\n')
