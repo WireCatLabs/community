@@ -23,14 +23,14 @@ import sqliteUtils from "sqlite-utils"
 export { openStore, readFileSync, sqliteUtils }
 `
 
-const lintProbe = (ownConfig = {}) => {
+const lintProbe = (ownConfig = {}, badSource = BAD) => {
   const probe = mkdtempSync(join(tmpdir(), "no-sqlite-driver-"))
   try {
     cpSync(join(root, "standards/configs"), join(probe, "config/wirecat"), { recursive: true })
     mkdirSync(join(probe, "src"))
     mkdirSync(join(probe, "test"))
     mkdirSync(join(probe, "scripts"))
-    writeFileSync(join(probe, "src/bad.ts"), BAD)
+    writeFileSync(join(probe, "src/bad.ts"), badSource)
     writeFileSync(join(probe, "src/good.ts"), GOOD)
     writeFileSync(join(probe, "test/bad.test.ts"), BAD)
     writeFileSync(join(probe, "scripts/seed.mjs"), BAD)
@@ -59,7 +59,7 @@ test("flags every way a CLI's source can load a SQLite driver, and nothing in te
   assert.deepEqual(lintProbe(), Array(7).fill("src/bad.ts"))
 })
 
-test("cli-core turns it off by repeating the plugin with no files", () => {
-  const off = { plugins: [{ path: "./config/wirecat/no-sqlite-driver.grit", includes: [] }] }
-  assert.deepEqual(lintProbe(off), [])
+test("cli-core turns it off per file with a suppression comment", () => {
+  const suppressed = `// biome-ignore-all lint/plugin/no-sqlite-driver: cli-core owns the store\n${BAD}`
+  assert.deepEqual(lintProbe({}, suppressed), [])
 })
