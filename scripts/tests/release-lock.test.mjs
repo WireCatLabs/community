@@ -104,7 +104,7 @@ function fixture(t, { name = "@wirecat/fixture", runtime } = {}) {
   const runtimeDirectory = runtime ?? directory
   return {
     directory,
-    lock: join(runtimeDirectory, "leemour-release-wirecat-fixture.lock"),
+    lock: join(runtimeDirectory, "wirecat-release-wirecat-fixture.lock"),
     options: { cwd: directory, env: { ...process.env, XDG_RUNTIME_DIR: runtimeDirectory }, encoding: "utf8" },
   }
 }
@@ -149,7 +149,7 @@ test("real contention preserves the inode and refuses before executing release w
 
 test("the lock remains held across child commands and is available after exit", async (t) => {
   const { options } = fixture(t)
-  const first = invoke(options, "sh -c 'if flock -n ./leemour-release-wirecat-fixture.lock true; then exit 7; fi'")
+  const first = invoke(options, "sh -c 'if flock -n ./wirecat-release-wirecat-fixture.lock true; then exit 7; fi'")
   assert.equal(first.status, 0)
   assert.equal(invoke(options, "printf released").stdout, "released")
   const child = await holder(t, options)
@@ -174,17 +174,17 @@ test("two checkouts of one package share a lock; different packages do not", asy
   const sameResult = invoke(fixture(t, { runtime }).options, "printf published")
   assert.equal(sameResult.status, 1)
   assert.equal(sameResult.stdout, "")
-  assert.match(sameResult.stderr, /leemour-release-wirecat-fixture\.lock/)
+  assert.match(sameResult.stderr, /wirecat-release-wirecat-fixture\.lock/)
   const other = invoke(fixture(t, { runtime, name: "@wirecat/other" }).options, "printf published")
   assert.equal(other.status, 0)
   assert.equal(other.stdout, "published")
-  assert.match(readFileSync(join(runtime, "leemour-release-wirecat-other.lock.who"), "utf8"), /pid/)
+  assert.match(readFileSync(join(runtime, "wirecat-release-wirecat-other.lock.who"), "utf8"), /pid/)
 })
 
 test("the lock key is the package name made filename-safe", (t) => {
   const { directory, options } = fixture(t, { name: "@scope/odd name:1" })
   assert.equal(invoke(options).status, 0)
-  statSync(join(directory, "leemour-release-scope-odd-name-1.lock"))
+  statSync(join(directory, "wirecat-release-scope-odd-name-1.lock"))
 })
 
 test("a missing or unusable package name refuses instead of sharing a lock", (t) => {
@@ -196,7 +196,7 @@ test("a missing or unusable package name refuses instead of sharing a lock", (t)
     assert.equal(result.stdout, "")
     assert.match(result.stderr, /package name/)
     assert.deepEqual(
-      readdirSync(directory).filter((file) => file.includes("leemour-release")),
+      readdirSync(directory).filter((file) => file.includes("wirecat-release")),
       [],
     )
   }
