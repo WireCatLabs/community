@@ -29,9 +29,11 @@ const lintProbe = (ownConfig = {}) => {
     cpSync(join(root, "standards/configs"), join(probe, "config/wirecat"), { recursive: true })
     mkdirSync(join(probe, "src"))
     mkdirSync(join(probe, "test"))
+    mkdirSync(join(probe, "scripts"))
     writeFileSync(join(probe, "src/bad.ts"), BAD)
     writeFileSync(join(probe, "src/good.ts"), GOOD)
     writeFileSync(join(probe, "test/bad.test.ts"), BAD)
+    writeFileSync(join(probe, "scripts/seed.mjs"), BAD)
     writeFileSync(join(probe, ".gitignore"), "node_modules\n")
     writeFileSync(
       join(probe, "biome.json"),
@@ -53,7 +55,7 @@ const lintProbe = (ownConfig = {}) => {
   }
 }
 
-test("flags every way a CLI's source can load a SQLite driver, and nothing in tests", () => {
+test("flags every way a CLI's source can load a SQLite driver, and nothing in tests or tooling scripts", () => {
   assert.deepEqual(lintProbe(), Array(7).fill("src/bad.ts"))
 })
 

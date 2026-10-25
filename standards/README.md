@@ -150,7 +150,7 @@ The shared Biome base also holds these structure rules:
 | `suspicious/noImportCycles` | error | Two modules that import each other, directly or through others |
 | `style/noExcessiveLinesPerFile` | error | A file over 1,000 lines; off for tests, `fixtures/` and `generated/` |
 | `plugin/no-deep-wirecat-import` | error | An import from `@wirecat/<package>/src/…` or `/dist/…`; tests may reach inside |
-| `plugin/no-sqlite-driver` | error | An import of `node:sqlite`, `bun:sqlite`, `better-sqlite3` or `drizzle-orm`: the shared store belongs to cli-core ([WC-STORE-5](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/store.md#wc-store-5--a-cli-writes-no-sql-against-the-shared-store)); tests may open SQLite |
+| `plugin/no-sqlite-driver` | error | An import of `node:sqlite`, `bun:sqlite`, `better-sqlite3` or `drizzle-orm`: the shared store belongs to cli-core ([WC-STORE-5](https://github.com/WireCatLabs/cli-base/blob/main/docs/standards/store.md#wc-store-5--a-cli-writes-no-sql-against-the-shared-store)); tests and tooling (`scripts/`, `bench/`, `performance/`, `contracts/`, `testing/`) may open SQLite |
 
 A repository's own `biome.json` is applied after the base, so a lower cap for the repository or a higher one
 for a single file goes there. The deep-import rule is a plugin, not `noRestrictedImports`: Biome lets the last
