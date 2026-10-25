@@ -18,7 +18,7 @@
     "ci:quick": "node --test --test-timeout=10000 scripts/tests/*.test.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.2",
+    "@biomejs/biome": "2.6.3",
     "@cspell/dict-en-gb": "5.0.38",
     "@cspell/dict-es-es": "3.0.9",
     "@cspell/dict-ru_ru": "2.3.4",
