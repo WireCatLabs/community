@@ -4,6 +4,10 @@ For WireCat CLI installation and usage, start with
 [wirecat.dev](https://wirecat.dev/) and the affected repository's README.
 Other WireCat projects may provide their own documentation and support channels.
 
+For questions, setup help, and talking with other users, join the community chat:
+[Discord](https://discord.gg/DebENqbRrJ) in English or
+[Telegram](https://t.me/wirecatdev) in Russian. Use issues for bugs, not the chat.
+
 Search existing issues before opening a new one in the affected repository.
 For a bug report, include the project and version, operating system, a minimal
 reproduction, the expected result, and the actual result. Redact logs and use
