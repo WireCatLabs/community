@@ -28,8 +28,9 @@ python3 scripts/sync-defaults.py --check
 python3 scripts/sync-defaults.py --apply
 ```
 
-The command uses existing GitHub CLI and Git authentication. Synchronization is
-manual and changes only the four managed entry-point files. It does not store a
+`--apply` opens a pull request in WireCatLabs/.github, whose main accepts changes only
+through pull requests. The command uses existing GitHub CLI and Git authentication.
+Synchronization is manual and changes only the four managed entry-point files. It does not store a
 cross-repository token. See [GitHub's inheritance rules](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file).
 
 ## Shared tooling
